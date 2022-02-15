@@ -4,10 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Animation/AnimMontage.h"
 #include "SCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
+class USInteractionComponent;
+class UAnimMontage;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter
@@ -18,13 +21,15 @@ public:
 	// Sets default values for this character's properties
 	ASCharacter();
 
+	UPROPERTY(VisibleAnywhere)
+	UCameraComponent* CameraComp;
+
 protected:
 
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(VisibleAnywhere)
-	UCameraComponent* CameraComp;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -32,9 +37,20 @@ protected:
 	void MoveRight(float Value);
 
 	void PrimaryAttack();
+	void PrimaryInteract();
+
+	FTimerHandle TimerHandle_StartAttackAnim;
+
+	void PrimaryAttackAnim();
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	TSubclassOf<AActor> PRojectileClass;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AActor> PRojectileClass;
+	USInteractionComponent* InteractionComp;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	UAnimMontage* AttackAnim;
 
 public:	
 	// Called every frame
