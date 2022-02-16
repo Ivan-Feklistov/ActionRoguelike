@@ -21,8 +21,20 @@ public:
 	// Sets default values for this character's properties
 	ASCharacter();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool DebugAttackHitLocation;
+
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComp;
+
+	UPROPERTY(VisibleAnywhere)
+	USInteractionComponent* InteractionComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AttackRate;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void TurnCharacterInDirectionOfAttack(FRotator FaceOrientation);
 
 protected:
 
@@ -45,9 +57,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	TSubclassOf<AActor> PRojectileClass;
-
-	UPROPERTY(EditAnywhere)
-	USInteractionComponent* InteractionComp;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	UAnimMontage* AttackAnim;

@@ -51,13 +51,23 @@ void USInteractionComponent::PrimaryInteract()
 	AActor* MyOwner = GetOwner();
 	MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
 	ASCharacter* MyCharacter = Cast<ASCharacter>(MyOwner);
+	FHitResult LineHit;
+	
 	if (MyCharacter)
 	{
 		//EyeLocation = MyCharacter->CameraComp->GetComponentLocation();
-		EyeRotation = MyCharacter->CameraComp->GetForwardVector().Rotation();
+		//EyeRotation = MyCharacter->CameraComp->GetForwardVector().Rotation();
+		FVector LineEnd;
+		
+		LineEnd = MyCharacter->CameraComp->GetComponentLocation() + MyCharacter->CameraComp->GetForwardVector() * 10000;
+
+		GetWorld()->LineTraceSingleByChannel(LineHit, MyCharacter->CameraComp->GetComponentLocation(), LineEnd, ECC_Visibility);
+
+		
 	}
 
-	End = EyeLocation + (EyeRotation.Vector() * InteractRange);
+	//End = EyeLocation + (EyeRotation.Vector() * InteractRange);
+	End = EyeLocation + (LineHit.Location - EyeLocation).Rotation().Vector() * InteractRange;
 
 	//FHitResult Hit;
 	//GetWorld()->LineTraceSingleByObjectType(Hit, EyeLocation, End, ObjectQueryParams);

@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "SInteractionComponent.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -23,6 +24,10 @@ ASCharacter::ASCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	InteractionComp = CreateDefaultSubobject<USInteractionComponent>("InteractionComp");
+
+	DebugAttackHitLocation = false;
+
+	AttackRate = 1.f;
 }
 
 // Called when the game starts or when spawned
@@ -53,9 +58,15 @@ void ASCharacter::MoveRight(float Value)
 
 void ASCharacter::PrimaryAttack()
 {
-	PlayAnimMontage(AttackAnim);
+	if(GetMesh()->GetAnimInstance()->Montage_IsPlaying(AttackAnim) == false)
+	{
+		PlayAnimMontage(AttackAnim, AttackRate);
+		GetWorldTimerManager().ClearTimer(TimerHandle_StartAttackAnim);
+		GetWorldTimerManager().SetTimer(TimerHandle_StartAttackAnim, this, &ASCharacter::PrimaryAttackAnim, 0.2f / AttackRate);
+		TurnCharacterInDirectionOfAttack(CameraComp->GetForwardVector().Rotation());
+	}
+
 	
-	GetWorldTimerManager().SetTimer(TimerHandle_StartAttackAnim, this, &ASCharacter::PrimaryAttackAnim, 0.2f);
 }
 
 
@@ -63,10 +74,35 @@ void ASCharacter::PrimaryAttack()
 void ASCharacter::PrimaryAttackAnim()
 {
 	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+	//FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
+
+	FVector End;
+	End = CameraComp->GetComponentLocation() + CameraComp->GetForwardVector() * 10000;
+	FHitResult Hit;
+	// Trace where camera looks, to determine where Projectile supposed to hit
+	GetWorld()->LineTraceSingleByChannel(Hit, CameraComp->GetComponentLocation(), End, ECC_Visibility);
+	if (DebugAttackHitLocation)
+		DrawDebugSphere(GetWorld(), Hit.Location, 12, 16, FColor::Red, false, 2.f);
+
+	FRotator RotOnTarget;
+	if (Hit.bBlockingHit)
+	{
+		RotOnTarget = (Hit.Location - HandLocation).Rotation();
+	}
+	else
+	{
+		RotOnTarget = (End - HandLocation).Rotation();
+	}
+	// if Camera look at something between camera and player i.e. Something blocking view
+	if ((HandLocation - CameraComp->GetComponentLocation()).Size() > (Hit.Location - CameraComp->GetComponentLocation()).Size())
+	{
+		RotOnTarget = (End - HandLocation).Rotation();
+	}
+
+	FTransform SpawnTM = FTransform(RotOnTarget, HandLocation);
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	
+	SpawnParams.Instigator = this;
 
 	GetWorld()->SpawnActor<AActor>(PRojectileClass, SpawnTM, SpawnParams);
 }
