@@ -56,13 +56,36 @@ void ASCharacter::MoveRight(float Value)
 	AddMovementInput(ControlRightVec, Value);
 }
 
-void ASCharacter::PrimaryAttack()
+// Play animation of attack, and then run required attack function
+void ASCharacter::AttackAnimation(AttackType Attack)
 {
 	if(GetMesh()->GetAnimInstance()->Montage_IsPlaying(AttackAnim) == false)
 	{
+		// Trace where camera looks, to determine where Projectile supposed to hit
+		
+		End = CameraComp->GetComponentLocation() + CameraComp->GetForwardVector() * 10000;
+		
+		GetWorld()->LineTraceSingleByChannel(Hit, CameraComp->GetComponentLocation(), End, ECC_Visibility);
+		if (DebugAttackHitLocation)
+			DrawDebugSphere(GetWorld(), Hit.Location, 12, 16, FColor::Red, false, 2.f);
+
 		PlayAnimMontage(AttackAnim, AttackRate);
 		GetWorldTimerManager().ClearTimer(TimerHandle_StartAttackAnim);
-		GetWorldTimerManager().SetTimer(TimerHandle_StartAttackAnim, this, &ASCharacter::PrimaryAttackAnim, 0.2f / AttackRate);
+		if (Attack == Primary)
+		{
+			GetWorldTimerManager().SetTimer(TimerHandle_StartAttackAnim, this, &ASCharacter::PrimaryAttack, 0.2f / AttackRate);
+		}
+			
+		if (Attack == Ultimate)
+		{
+			GetWorldTimerManager().SetTimer(TimerHandle_StartAttackAnim, this, &ASCharacter::UltimateAttack, 0.2f / AttackRate);
+		}
+
+		if (Attack == Dash)
+		{
+			GetWorldTimerManager().SetTimer(TimerHandle_StartAttackAnim, this, &ASCharacter::DashAttack, 0.2f / AttackRate);
+		}
+			
 		TurnCharacterInDirectionOfAttack(CameraComp->GetForwardVector().Rotation());
 	}
 
@@ -70,20 +93,41 @@ void ASCharacter::PrimaryAttack()
 }
 
 
+void ASCharacter::UltimateAttack()
+{
+	if (BlackHoleClass == nullptr)
+	{
+		return;
+	}
+	SpawnProjectile(BlackHoleClass);
+}
 
-void ASCharacter::PrimaryAttackAnim()
+void ASCharacter::DashAttack()
+{
+	if (DashClass == nullptr)
+	{
+		return;
+	}
+	SpawnProjectile(DashClass);
+}
+
+void ASCharacter::PrimaryAttack()
+{
+	if (PRojectileClass == nullptr)
+	{
+		return;
+	}
+	SpawnProjectile(PRojectileClass);
+	
+}
+
+void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ClassOfProjectile)
 {
 	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-	//FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
 
-	FVector End;
-	End = CameraComp->GetComponentLocation() + CameraComp->GetForwardVector() * 10000;
-	FHitResult Hit;
-	// Trace where camera looks, to determine where Projectile supposed to hit
-	GetWorld()->LineTraceSingleByChannel(Hit, CameraComp->GetComponentLocation(), End, ECC_Visibility);
-	if (DebugAttackHitLocation)
-		DrawDebugSphere(GetWorld(), Hit.Location, 12, 16, FColor::Red, false, 2.f);
+	
 
+	// Rotation of projectile on spawn
 	FRotator RotOnTarget;
 	if (Hit.bBlockingHit)
 	{
@@ -99,12 +143,12 @@ void ASCharacter::PrimaryAttackAnim()
 		RotOnTarget = (End - HandLocation).Rotation();
 	}
 
+	// Spawn Projectile
 	FTransform SpawnTM = FTransform(RotOnTarget, HandLocation);
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
-
-	GetWorld()->SpawnActor<AActor>(PRojectileClass, SpawnTM, SpawnParams);
+	GetWorld()->SpawnActor<AActor>(ClassOfProjectile, SpawnTM, SpawnParams);
 }
 
 void ASCharacter::PrimaryInteract()
@@ -130,7 +174,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 
-	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ASCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction<FAttackAnimationDelegate>("PrimaryAttack", IE_Pressed, this, &ASCharacter::AttackAnimation, AttackType::Primary);
+	PlayerInputComponent->BindAction<FAttackAnimationDelegate>("UltimateAttack", IE_Pressed, this, &ASCharacter::AttackAnimation, Ultimate);
+	PlayerInputComponent->BindAction<FAttackAnimationDelegate>("DashAttack", IE_Pressed, this, &ASCharacter::AttackAnimation, Dash);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ASCharacter::PrimaryInteract);

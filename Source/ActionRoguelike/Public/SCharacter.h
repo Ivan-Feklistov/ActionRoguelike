@@ -12,6 +12,14 @@ class UCameraComponent;
 class USInteractionComponent;
 class UAnimMontage;
 
+UENUM(BlueprintType)
+enum AttackType
+{
+	Primary,
+	Ultimate,
+	Dash
+};
+
 UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter
 {
@@ -36,6 +44,14 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void TurnCharacterInDirectionOfAttack(FRotator FaceOrientation);
 
+	
+
+	
+
+// 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AttackType")
+// 	AttackType Attack;
+	
+
 protected:
 
 	UPROPERTY(VisibleAnywhere)
@@ -48,15 +64,30 @@ protected:
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 
+	void AttackAnimation(AttackType Attack);
+	DECLARE_DELEGATE_OneParam(FAttackAnimationDelegate, AttackType);
+
 	void PrimaryAttack();
+	void UltimateAttack();
+	void DashAttack();
 	void PrimaryInteract();
+
+	UFUNCTION()
+	void SpawnProjectile(TSubclassOf<AActor> ClassOfProjectile);
 
 	FTimerHandle TimerHandle_StartAttackAnim;
 
-	void PrimaryAttackAnim();
+	FVector End;
+	FHitResult Hit;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	TSubclassOf<AActor> PRojectileClass;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	TSubclassOf<AActor> BlackHoleClass;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	TSubclassOf<AActor> DashClass;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	UAnimMontage* AttackAnim;

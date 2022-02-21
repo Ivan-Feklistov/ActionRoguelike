@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/SphereComponent.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "SMagicProjectile.generated.h"
 
 class USphereComponent;
@@ -33,6 +36,8 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UParticleSystemComponent* EffectComp;
+
+	void SetupBaseConstructor();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
