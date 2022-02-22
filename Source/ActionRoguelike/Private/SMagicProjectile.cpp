@@ -4,6 +4,7 @@
 #include "SMagicProjectile.h"
 
 
+
 // Sets default values
 ASMagicProjectile::ASMagicProjectile()
 {
@@ -17,6 +18,7 @@ ASMagicProjectile::ASMagicProjectile()
 void ASMagicProjectile::SetupBaseConstructor()
 {
 	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComp");
+	
 	RootComponent = SphereComp;
 
 	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>("EffectComp");
@@ -28,6 +30,24 @@ void ASMagicProjectile::SetupBaseConstructor()
 	MovementComp->bInitialVelocityInLocalSpace = true;
 
 	LifeSpan = 5.f;
+	Damage = 20.f;
+	bCanDealDamage = false;
+}
+
+void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+
+	if (OtherActor == nullptr || OtherActor == GetInstigator())
+	{
+		return;
+	}
+
+	USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
+	if (AttributeComp && bCanDealDamage)
+	{
+		AttributeComp->ApplyHealthChange(-Damage);
+		Destroy();
+	}
 }
 
 // Called when the game starts or when spawned
@@ -36,6 +56,8 @@ void ASMagicProjectile::BeginPlay()
 	Super::BeginPlay();
 
 	SetLifeSpan(LifeSpan);
+
+	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ASMagicProjectile::OnActorOverlap);
 	
 }
 

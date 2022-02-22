@@ -7,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "SAttributeComponent.h"
 #include "SMagicProjectile.generated.h"
 
 class USphereComponent;
@@ -26,6 +27,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	float LifeSpan;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Damage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanDealDamage;
+
 protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -38,6 +45,9 @@ protected:
 	UParticleSystemComponent* EffectComp;
 
 	void SetupBaseConstructor();
+
+	UFUNCTION()
+	void OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

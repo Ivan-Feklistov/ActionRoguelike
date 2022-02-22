@@ -23,9 +23,15 @@ void ASDashAbility::BeginPlay()
 	SphereComp->OnComponentHit.AddDynamic(this, &ASDashAbility::OnHit);
 }
 
+void ASDashAbility::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Explode();
+}
+
 void ASDashAbility::Explode()
 {
 	GetWorldTimerManager().ClearTimer(TimerHandle_Explode);
+	EffectComp->Complete();
 
 	MovementComp->StopMovementImmediately();
 
@@ -55,10 +61,7 @@ void ASDashAbility::DestroyMe()
 	Destroy();
 }
 
-void ASDashAbility::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	Explode();
-}
+
 
 // Called every frame
 void ASDashAbility::Tick(float DeltaTime)
