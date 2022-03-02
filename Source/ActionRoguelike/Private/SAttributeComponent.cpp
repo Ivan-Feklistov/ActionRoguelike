@@ -11,6 +11,7 @@ USAttributeComponent::USAttributeComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	Health = 100.f;
+	MaxHealth = 100.f;
 }
 
 
@@ -24,16 +25,21 @@ void USAttributeComponent::BeginPlay()
 }
 
 
+bool USAttributeComponent::IsAlive() const
+{
+	return Health > 0.f;
+}
+
 bool USAttributeComponent::ApplyHealthChange(float Delta)
 {
-	Health += Delta;
-
-	OnHealthChanged.Broadcast(nullptr, this, Health, Delta);
 
 	if (Health <= 0)
 	{
 		return false;
 	}
+	Health += Delta;
+	Health = FMath::Clamp(Health, 0.f, MaxHealth);
+	OnHealthChanged.Broadcast(nullptr, this, Health, Delta);
 
 	return true;
 }

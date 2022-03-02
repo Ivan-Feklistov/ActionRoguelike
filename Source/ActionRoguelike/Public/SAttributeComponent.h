@@ -21,13 +21,15 @@ public:
 
 protected:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Attributes")
-	float Health;
+
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:	
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	bool IsAlive() const;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
@@ -35,7 +37,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	bool ApplyHealthChange(float Delta);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	float Health;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	float MaxHealth;
 
 		
 };

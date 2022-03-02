@@ -20,10 +20,10 @@ void ASDashAbility::BeginPlay()
 	Super::BeginPlay();
 	
 	GetWorldTimerManager().SetTimer(TimerHandle_Explode, this, &ASDashAbility::Explode, TimeUntilTeleport);
-	SphereComp->OnComponentHit.AddDynamic(this, &ASDashAbility::OnHit);
+	//SphereComp->OnComponentHit.AddDynamic(this, &ASDashAbility::OnHit);
 }
 
-void ASDashAbility::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void ASDashAbility::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Explode();
 }
@@ -51,7 +51,9 @@ void ASDashAbility::Explode()
 		NewLocation.Z = 0.f;
 	}
 	UE_LOG(LogTemp, Log, TEXT("New location of Player is: %s"), *NewLocation.ToString());
-	Player->SetActorLocation(NewLocation);
+	// Teleport Player
+	//Player->SetActorLocation(NewLocation);
+	Player->TeleportTo(EffectLocation, Player->GetActorRotation(), false, false);
 
 	GetWorldTimerManager().SetTimer(TimerHandle_Destroy, this, &ASDashAbility::DestroyMe, 0.2f);
 }
