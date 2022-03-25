@@ -12,6 +12,7 @@ class UCameraComponent;
 class USInteractionComponent;
 class UAnimMontage;
 class USAttributeComponent;
+class UCameraShakeBase;
 
 UENUM(BlueprintType)
 enum AttackType
@@ -45,8 +46,17 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void TurnCharacterInDirectionOfAttack(FRotator FaceOrientation);
 
-	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USAttributeComponent* AttributeComp;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UCameraShakeBase> ShakeEffect;
+
+	UPROPERTY(EditAnywhere)
+	float InRadius;
+
+	UPROPERTY(EditAnywhere)
+	float OutRadius;
 	
 
 // 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AttackType")
@@ -93,8 +103,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	UAnimMontage* AttackAnim;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	USAttributeComponent* AttributeComp;
+	
 
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorACtor, USAttributeComponent* OwningComp, float NewHealth, float Delta);

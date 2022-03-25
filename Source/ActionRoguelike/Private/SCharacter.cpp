@@ -8,6 +8,8 @@
 #include "SInteractionComponent.h"
 #include "DrawDebugHelpers.h"
 #include "SAttributeComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -199,12 +201,20 @@ void ASCharacter::OnHealthChanged(AActor* InstigatorACtor, USAttributeComponent*
 	if (AttributeComp->Health > 0.f && Delta < 0.0f)
 	{
 		GetMesh()->SetScalarParameterValueOnMaterials("HitFlashTime", GetWorld()->TimeSeconds);
+		if (ShakeEffect)
+		{
+			UGameplayStatics::PlayWorldCameraShake(GetWorld(), ShakeEffect, Hit.Location, InRadius, OutRadius);
+		}
 	}
-
+	// if dead
 	if (NewHealth <= 0.0f && Delta < 0.0f)
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		DisableInput(PC);
+		UCapsuleComponent* Capsule = GetCapsuleComponent();
+		Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
+		USkeletalMeshComponent* MeshComp = GetMesh();
+		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 

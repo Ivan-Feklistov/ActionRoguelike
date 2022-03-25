@@ -60,7 +60,7 @@ void ABaseProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 void ABaseProjectile::OnHitEvent_Implementation()
 {
-
+	
 }
 
 void ABaseProjectile::OnOverlapEvent_Implementation()

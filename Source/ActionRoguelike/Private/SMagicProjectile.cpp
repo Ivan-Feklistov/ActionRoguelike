@@ -67,13 +67,16 @@ void ASMagicProjectile::OnActorHit(UPrimitiveComponent* HitComponent, AActor* Ot
 		AttributeComp->ApplyHealthChange(-Damage);
 		//ASCharacter* OtherCharacter = Cast<ASCharacter>(OtherActor);
 		//OtherCharacter->GetMesh()->SetScalarParameterValueOnMaterials("HitFlashTime", GetWorld()->TimeSeconds);
-		Destroy();
+		//Destroy();
+
 	}
 
 	if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.Location);
 	}
+
+	
 	Destroy();
 }
 
