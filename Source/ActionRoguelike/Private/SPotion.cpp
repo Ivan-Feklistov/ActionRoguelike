@@ -13,6 +13,7 @@ ASPotion::ASPotion()
 
 	bCanInteract = true;
 	HealthCapacity = 20.f;
+	ResetTime = 10.f;
 }
 
 // Called when the game starts or when spawned
@@ -25,6 +26,18 @@ void ASPotion::BeginPlay()
 
 void ASPotion::Interact_Implementation(APawn* InstigatorPawn)
 {
+	UsePotion(InstigatorPawn);
+}
+
+
+void ASPotion::ResetPotion()
+{
+	bCanInteract = true;
+	SetActorHiddenInGame(false);
+}
+
+void ASPotion::UsePotion(APawn* InstigatorPawn)
+{
 	if (bCanInteract)
 	{
 		ASCharacter* Player = Cast<ASCharacter>(InstigatorPawn);
@@ -35,25 +48,17 @@ void ASPotion::Interact_Implementation(APawn* InstigatorPawn)
 			{
 				return;
 			}
-	
+
 			//add health to character
 			AttributeComp->ApplyHealthChange(HealthCapacity);
-			
+
 			// hide mesh for 10 sec
 			SetActorHiddenInGame(true);
 			bCanInteract = false;
-			UE_LOG(LogTemp, Warning, TEXT("Potion interacted!"));
-			GetWorldTimerManager().SetTimer(TimerHandle_ResetTimer, this, &ASPotion::ResetPotion, 10);
+			UE_LOG(LogTemp, Log, TEXT("Potion interacted!"));
+			GetWorldTimerManager().SetTimer(TimerHandle_ResetTimer, this, &ASPotion::ResetPotion, ResetTime);
 		}
 	}
-	
-}
-
-
-void ASPotion::ResetPotion()
-{
-	bCanInteract = true;
-	SetActorHiddenInGame(false);
 }
 
 // Called every frame

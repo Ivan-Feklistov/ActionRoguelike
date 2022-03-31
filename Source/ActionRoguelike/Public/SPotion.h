@@ -19,6 +19,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	float HealthCapacity;
 
+	UPROPERTY(EditAnywhere)
+	float ResetTime;
+
 	bool bCanInteract;
 
 protected:
@@ -29,6 +32,8 @@ protected:
 
 	UFUNCTION()
 	void ResetPotion();
+
+	void UsePotion(APawn* InstigatorPawn);
 
 public:	
 

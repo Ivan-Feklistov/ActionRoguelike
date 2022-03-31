@@ -13,6 +13,7 @@ class USInteractionComponent;
 class UAnimMontage;
 class USAttributeComponent;
 class UCameraShakeBase;
+class UParticleSystem;
 
 UENUM(BlueprintType)
 enum AttackType
@@ -102,6 +103,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	UAnimMontage* AttackAnim;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effect")
+	UParticleSystem* MuzzleEffect;
 
 	
 

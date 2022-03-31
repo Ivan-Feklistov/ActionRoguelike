@@ -76,11 +76,13 @@ void ASCharacter::AttackAnimation(AttackType Attack)
 		// Trace where camera looks, to determine where Projectile supposed to hit
 		
 		End = CameraComp->GetComponentLocation() + CameraComp->GetForwardVector() * 10000;
-		
-		GetWorld()->LineTraceSingleByChannel(Hit, CameraComp->GetComponentLocation(), End, ECC_Visibility);
+		FCollisionQueryParams QueryParams;
+		QueryParams.bTraceComplex = true;
+		GetWorld()->LineTraceSingleByChannel(Hit, CameraComp->GetComponentLocation(), End, ECC_Camera, QueryParams);
 		if (DebugAttackHitLocation)
 			DrawDebugSphere(GetWorld(), Hit.Location, 12, 16, FColor::Red, false, 2.f);
 
+		// play attack montage and in a point where hand is pointing forward activate specific spawn projectile function
 		PlayAnimMontage(AttackAnim, AttackRate);
 		GetWorldTimerManager().ClearTimer(TimerHandle_StartAttackAnim);
 		if (Attack == Primary)
@@ -137,7 +139,7 @@ void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ClassOfProjectile)
 {
 	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
 
-	
+
 
 	// Rotation of projectile on spawn
 	FRotator RotOnTarget;
@@ -161,6 +163,10 @@ void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ClassOfProjectile)
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
 	GetWorld()->SpawnActor<AActor>(ClassOfProjectile, SpawnTM, SpawnParams);
+	if (MuzzleEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleEffect, SpawnTM);
+	}
 }
 
 void ASCharacter::PrimaryInteract()
