@@ -22,4 +22,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "AI")
 	TSubclassOf<AActor> ProjectileClass;
+
+public:
+	USBTTask_RangedAttack();
+
+	UPROPERTY(EditAnywhere, Category = "AI")
+	float MaxBulletSpread;
 };

@@ -23,6 +23,9 @@ public:
 
 	USAttributeComponent* GetAttributeComponent();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector ForceDirection;
+
 protected:
 
 	UPROPERTY(EditAnywhere, Category = "Components")
@@ -36,6 +39,14 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool bDebugPlayerSpotted;
+
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
+
+	void SetNewTargetActor(AActor* InstigatorActor);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void DisappearWhenDead();
 
 
 	// Called when the game starts or when spawned

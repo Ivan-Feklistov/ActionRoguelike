@@ -27,7 +27,8 @@ void USBTService_CheckLowHealth::TickNode(UBehaviorTreeComponent& OwnerComp, uin
 		USAttributeComponent* AttribComp = AIChar->GetAttributeComponent();
 		if (AttribComp)
 		{
-			if (AttribComp->Health < AttribComp->MaxHealth)
+			//if minion is injured and alive then activate healing
+			if ((AttribComp->Health < AttribComp->MaxHealth) && (AttribComp->IsAlive()))
 			{
 				BlackboardComp->SetValueAsBool(StartHealKey.SelectedKeyName, true);
 			}

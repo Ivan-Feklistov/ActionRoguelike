@@ -11,6 +11,8 @@ ABaseProjectile::ABaseProjectile()
 
 	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComp");
 	RootComponent = SphereComp;
+	SphereComp->SetCollisionObjectType(ECC_GameTraceChannel2);
+	SphereComp->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECR_Overlap);
 
 	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>("EffectComp");
 	EffectComp->SetupAttachment(SphereComp);

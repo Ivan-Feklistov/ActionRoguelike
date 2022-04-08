@@ -50,7 +50,7 @@ void ASPotion::UsePotion(APawn* InstigatorPawn)
 			}
 
 			//add health to character
-			AttributeComp->ApplyHealthChange(HealthCapacity);
+			AttributeComp->ApplyHealthChange(this, HealthCapacity);
 
 			// hide mesh for 10 sec
 			SetActorHiddenInGame(true);

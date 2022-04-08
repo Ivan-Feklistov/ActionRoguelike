@@ -4,6 +4,13 @@
 #include "AI/SBTTask_RangedAttack.h"
 #include "AIController.h"
 #include "GameFramework/Character.h"
+#include "SAttributeComponent.h"
+
+
+USBTTask_RangedAttack::USBTTask_RangedAttack()
+{
+	MaxBulletSpread = 2.0f;
+}
 
 EBTNodeResult::Type USBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -16,17 +23,27 @@ EBTNodeResult::Type USBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& O
 			return EBTNodeResult::Failed;
 		}
 
-		FVector MuzzleLocation = MyCharacter->GetMesh()->GetSocketLocation("Muzzle_01");
-
+		// check if target actor is set
 		AActor* TargetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("Target"));
 		if (TargetActor == nullptr)
 		{
 			return EBTNodeResult::Failed;
 		}
 
+		if (!USAttributeComponent::IsActorAlive(TargetActor))
+		{
+			return EBTNodeResult::Failed;
+		}
+
+		FVector MuzzleLocation = MyCharacter->GetMesh()->GetSocketLocation("Muzzle_01");
 		FVector Direction = TargetActor->GetActorLocation() - MuzzleLocation;
 		FRotator MuzzleRotation = Direction.Rotation();
 
+		// correct accuracy
+		MuzzleRotation.Pitch += FMath::RandRange(0.0f, MaxBulletSpread);
+		MuzzleRotation.Yaw += FMath::RandRange(-MaxBulletSpread, MaxBulletSpread);
+
+		// spawn projectile
 		FActorSpawnParameters Params;
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		Params.Instigator = MyCharacter;
@@ -37,3 +54,4 @@ EBTNodeResult::Type USBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& O
 
 	return EBTNodeResult::Failed;
 }
+

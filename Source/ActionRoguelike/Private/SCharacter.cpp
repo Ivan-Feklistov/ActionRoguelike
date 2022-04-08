@@ -202,17 +202,19 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 
 
-void ASCharacter::OnHealthChanged(AActor* InstigatorACtor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
+void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
 {
 	if (AttributeComp->Health > 0.f && Delta < 0.0f)
 	{
 		GetMesh()->SetScalarParameterValueOnMaterials("HitFlashTime", GetWorld()->TimeSeconds);
+		// shake camera
+		UE_LOG(LogTemp, Log, TEXT("Player damaged"));
 		if (ShakeEffect)
 		{
-			UGameplayStatics::PlayWorldCameraShake(GetWorld(), ShakeEffect, Hit.Location, InRadius, OutRadius);
+			UGameplayStatics::PlayWorldCameraShake(GetWorld(), ShakeEffect, GetActorLocation(), InRadius, OutRadius);
 		}
 	}
-	// if dead
+	// if dead stop movement and collisions
 	if (NewHealth <= 0.0f && Delta < 0.0f)
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());

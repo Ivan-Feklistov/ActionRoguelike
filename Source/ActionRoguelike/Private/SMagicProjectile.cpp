@@ -46,7 +46,7 @@ void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent,
 	USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
 	if (AttributeComp && bCanDealDamage)
 	{
-		AttributeComp->ApplyHealthChange(-Damage);
+		AttributeComp->ApplyHealthChange(GetInstigator(), -Damage);
 		Destroy();
 	}
 
@@ -64,7 +64,7 @@ void ASMagicProjectile::OnActorHit(UPrimitiveComponent* HitComponent, AActor* Ot
 	USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
 	if (AttributeComp && bCanDealDamage)
 	{
-		AttributeComp->ApplyHealthChange(-Damage);
+		AttributeComp->ApplyHealthChange(GetInstigator(), -Damage);
 		//ASCharacter* OtherCharacter = Cast<ASCharacter>(OtherActor);
 		//OtherCharacter->GetMesh()->SetScalarParameterValueOnMaterials("HitFlashTime", GetWorld()->TimeSeconds);
 		//Destroy();

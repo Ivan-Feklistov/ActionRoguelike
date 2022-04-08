@@ -110,7 +110,7 @@ protected:
 	
 
 	UFUNCTION()
-	void OnHealthChanged(AActor* InstigatorACtor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
+	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 
 	virtual void PostInitializeComponents() override;
 
