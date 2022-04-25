@@ -14,6 +14,7 @@ class UAnimMontage;
 class USAttributeComponent;
 class UCameraShakeBase;
 class UParticleSystem;
+class USActionComponent;
 
 UENUM(BlueprintType)
 enum AttackType
@@ -69,6 +70,9 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Action")
+	USActionComponent* ActionComp;
+
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -86,6 +90,12 @@ protected:
 
 	UFUNCTION()
 	void SpawnProjectile(TSubclassOf<AActor> ClassOfProjectile);
+
+	UFUNCTION()
+	void SprintStart();
+
+	UFUNCTION()
+	void SprintStop();
 
 	FTimerHandle TimerHandle_StartAttackAnim;
 
@@ -120,5 +130,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION(Exec)
+	void HealSelf(float Amount = 100.f);
 
 };

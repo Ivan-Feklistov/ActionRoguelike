@@ -2,6 +2,10 @@
 
 
 #include "SAttributeComponent.h"
+#include "SGameMode.h"
+#include "GameFramework/PlayerState.h"
+
+static TAutoConsoleVariable<float> CVarDamageMultiplier(TEXT("s.DamageMultiplier"), 1.f, TEXT("Global multiplier for damage"), ECVF_Cheat);
 
 // Sets default values for this component's properties
 USAttributeComponent::USAttributeComponent()
@@ -12,6 +16,8 @@ USAttributeComponent::USAttributeComponent()
 
 	Health = 100.f;
 	MaxHealth = 100.f;
+	MaxScore = 9999;
+	GetPlayerScore();
 }
 
 
@@ -20,19 +26,33 @@ void USAttributeComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+
 }
 
+
+bool USAttributeComponent::Kill(AActor* InstigatorActor)
+{
+	return ApplyHealthChange(InstigatorActor, -MaxHealth);
+}
 
 bool USAttributeComponent::IsAlive() const
 {
 	return Health > 0.f;
 }
 
+
+// when health changed broadcast it and check if dead
 bool USAttributeComponent::ApplyHealthChange(AActor* HealthChangeInstigator, float Delta)
 {
+	if (!GetOwner()->CanBeDamaged() && Delta < 0.0f)
+	{
+		return false;
+	}
 
+	if (Delta < 0.0f)
+	{
+		Delta = Delta * CVarDamageMultiplier.GetValueOnGameThread();
+	}
 	
 	float OldHealth = Health;
 
@@ -40,6 +60,17 @@ bool USAttributeComponent::ApplyHealthChange(AActor* HealthChangeInstigator, flo
 	Health = FMath::Clamp(Health, 0.f, MaxHealth);
 	float ActualDelta = Health - OldHealth;
 	OnHealthChanged.Broadcast(HealthChangeInstigator, this, Health, ActualDelta);
+
+	// died
+	if (ActualDelta < 0.0f && Health == 0.0f)
+	{
+		ASGameMode* GameMode = GetWorld()->GetAuthGameMode<ASGameMode>();
+		if (GameMode)
+		{
+			GameMode->OnActorKilled(GetOwner(), HealthChangeInstigator);
+		}
+	}
+
 	return ActualDelta != 0;
 }
 
@@ -49,7 +80,6 @@ USAttributeComponent* USAttributeComponent::GetAttributes(AActor* FromActor)
 	{
 		return Cast<USAttributeComponent>(FromActor->GetComponentByClass(USAttributeComponent::StaticClass()));
 	}
-
 	return nullptr;
 }
 
@@ -61,5 +91,45 @@ bool USAttributeComponent::IsActorAlive(AActor* Actor)
 		return AttributeComp->IsAlive();
 	}
 	return false;
+}
+
+// credits
+
+float USAttributeComponent::GetPlayerScore()
+{
+	APawn* Player = Cast<APawn>(GetOwner());
+	if (Player)
+	{
+		APlayerState* PlayerState = Player->GetPlayerState();
+		if (PlayerState)
+		{	
+			PlayerScore = PlayerState->GetScore();
+			return PlayerScore;
+		}
+	}
+	return 0;
+
+}
+
+
+void USAttributeComponent::ChangePlayerScore(float DeltaScore)
+{
+	APawn* Player = Cast<APawn>(GetOwner());
+	if (Player)
+	{
+		APlayerState* PlayerState = Player->GetPlayerState();
+		if (PlayerState)
+		{
+			GetPlayerScore();
+			float OldScore = PlayerScore;
+			PlayerScore = PlayerScore + DeltaScore;
+			PlayerScore = FMath::Clamp(PlayerScore, 0.0f, MaxScore);
+			PlayerState->SetScore(PlayerScore);
+
+			float ActualDelta = PlayerScore - OldScore;
+			OnScoreChanged.Broadcast(this, PlayerScore, ActualDelta);
+		}
+
+	}
 }
 

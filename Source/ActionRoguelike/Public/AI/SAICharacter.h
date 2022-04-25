@@ -10,6 +10,7 @@
 
 class UPawnSensingComponent;
 class USAttributeComponent;
+class USWorldUserWidget;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASAICharacter : public ACharacter
@@ -23,8 +24,12 @@ public:
 
 	USAttributeComponent* GetAttributeComponent();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 	FVector ForceDirection;
+
+	// number of points rewarded for kill of this bot
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ScoreCost;
 
 protected:
 
@@ -47,6 +52,17 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void DisappearWhenDead();
+
+
+	// UI for showing how much health left
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> HealthBarWidgetClass;
+
+	UPROPERTY()
+	USWorldUserWidget* ActiveHealthBar;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	FVector HealthBarOffset;
 
 
 	// Called when the game starts or when spawned

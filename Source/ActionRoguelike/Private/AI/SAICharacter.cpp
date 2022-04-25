@@ -10,6 +10,7 @@
 #include "BrainComponent.h"
 #include "SCharacter.h"
 #include "Components/CapsuleComponent.h"
+#include "SWorldUserWidget.h"
 
 // Sets default values
 ASAICharacter::ASAICharacter()
@@ -23,6 +24,9 @@ ASAICharacter::ASAICharacter()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	ForceDirection = FVector(-100.f, 0.f, 0.f);
+	HealthBarOffset = FVector(0.f, 0.f, 0.f);
+
+	ScoreCost = 10;
 }
 
 
@@ -62,7 +66,7 @@ void ASAICharacter::OnPawnSeen(APawn* Pawn)
 	}
 }
 
-
+// set new target to shoot for AI
 void ASAICharacter::SetNewTargetActor(AActor* InstigatorActor)
 {
 	AAIController* AICont = Cast<AAIController>(GetController());
@@ -74,15 +78,27 @@ void ASAICharacter::SetNewTargetActor(AActor* InstigatorActor)
 	}
 }
 
+// if bot damaged by player then spawn healthbar over bot, flash red on material, and destroy if killed
 void ASAICharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
 {
 	if (Delta < 0.0f && InstigatorActor->GetClass()->IsChildOf(ASCharacter::StaticClass()))
 	{
-		
-		
-		SetNewTargetActor(InstigatorActor);
+		// spawn healbar
+		if (ActiveHealthBar == nullptr && HealthBarWidgetClass)
+		{
+			ActiveHealthBar = CreateWidget<USWorldUserWidget>(GetWorld(), HealthBarWidgetClass);
+			if (ActiveHealthBar)
+			{
+				ActiveHealthBar->WorldOffset = HealthBarOffset;
+				ActiveHealthBar->AttachedActor = this;
+				ActiveHealthBar->AddToViewport();
+			}
+		}
+
 		//UE_LOG(LogTemp, Log, TEXT("Minion Damaged"));
+		SetNewTargetActor(InstigatorActor);
 		
+		// flash red on Ai mesh material
 		GetMesh()->SetScalarParameterValueOnMaterials("HitFlashTime", GetWorld()->TimeSeconds);
 
 		// if dead
@@ -104,7 +120,7 @@ void ASAICharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponen
 			
 			// destroy timer
 			SetLifeSpan(15.f);
-			// blueprint event for decorating body disappearance
+			// blueprint event for showing body disappearance
 			DisappearWhenDead();
 			// launch dead body away from player
 			GetMesh()->AddImpulse(ForceDirection, NAME_None, true);

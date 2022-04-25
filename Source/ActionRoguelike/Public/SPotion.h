@@ -20,9 +20,7 @@ public:
 	float HealthCapacity;
 
 	UPROPERTY(EditAnywhere)
-	float ResetTime;
-
-	bool bCanInteract;
+	float PotionCost;
 
 protected:
 	// Called when the game starts or when spawned

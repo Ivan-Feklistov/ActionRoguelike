@@ -13,6 +13,8 @@ ASBasePickUp::ASBasePickUp()
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("MeshComp");
 	RootComponent = MeshComp;
+
+	MeshComp->SetCollisionResponseToAllChannels(ECR_Overlap);
 }
 
 // Called when the game starts or when spawned
@@ -30,6 +32,25 @@ void ASBasePickUp::Tick(float DeltaTime)
 }
 
 void ASBasePickUp::Interact_Implementation(APawn* InstigatorPawn)
+{
+	UsePickUp(InstigatorPawn);
+}
+
+void ASBasePickUp::ResetPickUp()
+{
+	bCanInteract = true;
+	SetActorHiddenInGame(false);
+}
+
+void ASBasePickUp::UsePickUp(APawn* InstigatorPawn)
+{
+	if (bCanInteract)
+	{
+		OnPickUpInteract(InstigatorPawn);
+	}
+}
+
+void ASBasePickUp::OnPickUpInteract_Implementation(APawn* InstigatorPawn)
 {
 
 }

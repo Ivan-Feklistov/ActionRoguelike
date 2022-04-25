@@ -7,6 +7,9 @@
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "SGameMode.generated.h"
 
+// TODO function for granting credits to player
+// TODO query for spawning of coins and potions
+
 class UEnvQuery;
 class UCurveFloat;
 
@@ -19,13 +22,26 @@ public:
 
 	ASGameMode();
 
+	virtual void StartPlay() override;
+
+	// class of bots to spawn
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TSubclassOf<AActor> MinionClass;
 
-	virtual void StartPlay() override;
-
+	// maximum number of bots
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	float MaxNumOfBots = 10.f;
+
+	// console command to kill all bots
+	UFUNCTION(Exec)
+	void KillAll();
+
+	virtual void OnActorKilled(AActor* Victim, AActor* Killer);
+
+	void ChangeScore(AActor* TargetActor, float ScoreDelta);
+
+	UPROPERTY(EditAnywhere)
+	float RespawnDelay = 5.0f;
 
 protected:
 
@@ -45,5 +61,8 @@ protected:
 
 	UFUNCTION()
 	void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void RespawnPlayerElapsed(AController* Controller);
 	
 };

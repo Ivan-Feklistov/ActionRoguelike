@@ -14,6 +14,7 @@ ASPotion::ASPotion()
 	bCanInteract = true;
 	HealthCapacity = 20.f;
 	ResetTime = 10.f;
+	PotionCost = 30.f;
 }
 
 // Called when the game starts or when spawned
@@ -44,13 +45,20 @@ void ASPotion::UsePotion(APawn* InstigatorPawn)
 		USAttributeComponent* AttributeComp = Player->AttributeComp;
 		if (AttributeComp)
 		{
+			if (AttributeComp->GetPlayerScore() < PotionCost)
+			{
+				return;
+			}
 			if (AttributeComp->Health == AttributeComp->MaxHealth)
 			{
 				return;
 			}
 
-			//add health to character
+			// add health to character
 			AttributeComp->ApplyHealthChange(this, HealthCapacity);
+
+			// decrease credits
+			AttributeComp->ChangePlayerScore(-PotionCost);
 
 			// hide mesh for 10 sec
 			SetActorHiddenInGame(true);

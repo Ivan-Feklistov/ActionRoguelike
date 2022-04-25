@@ -9,6 +9,7 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, InstigatorActor, USAttributeComponent*, OwningComp, float, NewHealth, float, Delta);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnScoreChanged, USAttributeComponent*, OwningComp, float, NewScore, float, Delta);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ACTIONROGUELIKE_API USAttributeComponent : public UActorComponent
@@ -31,11 +32,13 @@ public:
 protected:
 
 
-
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:	
+
+	UFUNCTION(BlueprintCallable)
+	bool Kill(AActor* InstigatorActor);
 
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	bool IsAlive() const;
@@ -52,5 +55,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	float MaxHealth;
 
-		
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Credits")
+	float PlayerScore;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Credits")
+	float MaxScore;
+
+	UFUNCTION(BlueprintCallable, Category = "Credits")
+	float GetPlayerScore();
+
+	UFUNCTION(BlueprintCallable, Category = "Credits")
+	void ChangePlayerScore(float DeltaScore);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnScoreChanged OnScoreChanged;
 };
