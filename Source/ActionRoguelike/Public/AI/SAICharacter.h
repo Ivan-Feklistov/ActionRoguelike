@@ -11,6 +11,7 @@
 class UPawnSensingComponent;
 class USAttributeComponent;
 class USWorldUserWidget;
+class USActionComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASAICharacter : public ACharacter
@@ -39,6 +40,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	USAttributeComponent* AttributeComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USActionComponent* ActionComp;
+
 	UFUNCTION()
 	void OnPawnSeen(APawn* Pawn);
 
@@ -53,7 +57,6 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void DisappearWhenDead();
 
-
 	// UI for showing how much health left
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> HealthBarWidgetClass;
@@ -63,7 +66,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	FVector HealthBarOffset;
-
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

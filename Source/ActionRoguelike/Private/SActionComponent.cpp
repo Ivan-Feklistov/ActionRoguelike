@@ -19,7 +19,10 @@ void USActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	for (TSubclassOf<USAction> ActionClass : DefaultActions)
+	{
+		AddAction(ActionClass);
+	}
 	
 }
 
@@ -29,18 +32,35 @@ void USActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	// debug - what action is active
+	if (DebugMssages)
+	{
+		FString DebugMessage = "Actor: " + GetNameSafe(GetOwner()) + " is executing action: " + ActiveGameplayTags.ToStringSimple();
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, DebugMessage);
+	}
+
 }
 
 void USActionComponent::AddAction(TSubclassOf<USAction> ActionClass)
 {
 	if (!ActionClass)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot add Action: nullptr"));
 		return;
 	}
+	
 	USAction* NewAction = NewObject<USAction>(this, ActionClass);
 	if (NewAction)
 	{
+		for (USAction* Action : Actions)
+		{
+			if (Action->ActionName == NewAction->ActionName)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Player already has that Action: %s"), *GetNameSafe(ActionClass));
+				return;
+			}
+		}
+
 		Actions.Add(NewAction);
 	}
 }
@@ -51,6 +71,10 @@ bool USActionComponent::StartActionByName(AActor* InstigatorActor, FName ActionN
 	{
 		if (Action && Action->ActionName == ActionName)
 		{
+			if (!Action->CanStart(InstigatorActor))
+			{
+				continue;
+			}
 			Action->StartAction(InstigatorActor);
 			return true;
 		}
@@ -64,8 +88,11 @@ bool USActionComponent::StopActionByName(AActor* InstigatorActor, FName ActionNa
 	{
 		if (Action && Action->ActionName == ActionName)
 		{
-			Action->StopAction(InstigatorActor);
-			return true;
+			if (Action->IsRunning())
+			{
+				Action->StopAction(InstigatorActor);
+				return true;
+			}			
 		}
 	}
 	return false;

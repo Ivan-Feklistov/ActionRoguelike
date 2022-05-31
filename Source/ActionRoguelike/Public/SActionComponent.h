@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "SAction.h"
+#include "GameplayTagContainer.h"
 #include "SActionComponent.generated.h"
 
 class USAction;
@@ -18,6 +19,9 @@ public:
 	// Sets default values for this component's properties
 	USActionComponent();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tags")
+	FGameplayTagContainer ActiveGameplayTags;
+
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	void AddAction(TSubclassOf<USAction> ActionClass);
 
@@ -27,7 +31,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	bool StopActionByName(AActor* InstigatorActor, FName ActionName);
 
+
+
 protected:
+
+	// grant default abilities on the start of the game
+	UPROPERTY(EditAnywhere, Category = "Action")
+	TArray<TSubclassOf<USAction>> DefaultActions;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	bool DebugMssages;
 
 	UPROPERTY()
 	TArray<USAction*> Actions;

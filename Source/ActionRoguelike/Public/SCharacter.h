@@ -33,17 +33,11 @@ public:
 	// Sets default values for this character's properties
 	ASCharacter();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool DebugAttackHitLocation;
-
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComp;
 
 	UPROPERTY(VisibleAnywhere)
 	USInteractionComponent* InteractionComp;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float AttackRate;
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void TurnCharacterInDirectionOfAttack(FRotator FaceOrientation);
@@ -82,14 +76,9 @@ protected:
 
 	void AttackAnimation(AttackType Attack);
 	DECLARE_DELEGATE_OneParam(FAttackAnimationDelegate, AttackType);
-
-	void PrimaryAttack();
-	void UltimateAttack();
-	void DashAttack();
-	void PrimaryInteract();
-
+	
 	UFUNCTION()
-	void SpawnProjectile(TSubclassOf<AActor> ClassOfProjectile);
+	void PrimaryInteract();
 
 	UFUNCTION()
 	void SprintStart();
@@ -97,30 +86,14 @@ protected:
 	UFUNCTION()
 	void SprintStop();
 
-	FTimerHandle TimerHandle_StartAttackAnim;
-
-	FVector End;
-	FHitResult Hit;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	TSubclassOf<AActor> PRojectileClass;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	TSubclassOf<AActor> BlackHoleClass;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	TSubclassOf<AActor> DashClass;
-
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	UAnimMontage* AttackAnim;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Effect")
-	UParticleSystem* MuzzleEffect;
-
-	
-
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
+
+	UFUNCTION()
+	void Killed();
 
 	virtual void PostInitializeComponents() override;
 

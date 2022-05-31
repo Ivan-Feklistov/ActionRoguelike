@@ -33,9 +33,6 @@ ASCharacter::ASCharacter()
 
 	ActionComp = CreateDefaultSubobject<USActionComponent>("ActionComp");
 
-	DebugAttackHitLocation = false;
-
-	AttackRate = 1.f;
 }
 
 void ASCharacter::PostInitializeComponents()
@@ -76,31 +73,24 @@ void ASCharacter::AttackAnimation(AttackType Attack)
 {
 	if(GetMesh()->GetAnimInstance()->Montage_IsPlaying(AttackAnim) == false)
 	{
-		// Trace where camera looks, to determine where Projectile supposed to hit
-		
-		End = CameraComp->GetComponentLocation() + CameraComp->GetForwardVector() * 10000;
-		FCollisionQueryParams QueryParams;
-		QueryParams.bTraceComplex = true;
-		GetWorld()->LineTraceSingleByChannel(Hit, CameraComp->GetComponentLocation(), End, ECC_Camera, QueryParams);
-		if (DebugAttackHitLocation)
-			DrawDebugSphere(GetWorld(), Hit.Location, 12, 16, FColor::Red, false, 2.f);
 
-		// play attack montage and in a point where hand is pointing forward activate specific spawn projectile function
-		PlayAnimMontage(AttackAnim, AttackRate);
-		GetWorldTimerManager().ClearTimer(TimerHandle_StartAttackAnim);
+		//GetWorldTimerManager().ClearTimer(TimerHandle_StartAttackAnim);
 		if (Attack == Primary)
 		{
-			GetWorldTimerManager().SetTimer(TimerHandle_StartAttackAnim, this, &ASCharacter::PrimaryAttack, 0.2f / AttackRate);
+			//GetWorldTimerManager().SetTimer(TimerHandle_StartAttackAnim, this, &ASCharacter::PrimaryAttack, 0.2f / AttackRate);
+			ActionComp->StartActionByName(this, "PrimaryAttack");
 		}
 			
 		if (Attack == Ultimate)
 		{
-			GetWorldTimerManager().SetTimer(TimerHandle_StartAttackAnim, this, &ASCharacter::UltimateAttack, 0.2f / AttackRate);
+			//GetWorldTimerManager().SetTimer(TimerHandle_StartAttackAnim, this, &ASCharacter::UltimateAttack, 0.2f / AttackRate);
+			ActionComp->StartActionByName(this, "Ultimate");
 		}
 
 		if (Attack == Dash)
 		{
-			GetWorldTimerManager().SetTimer(TimerHandle_StartAttackAnim, this, &ASCharacter::DashAttack, 0.2f / AttackRate);
+			//GetWorldTimerManager().SetTimer(TimerHandle_StartAttackAnim, this, &ASCharacter::DashAttack, 0.2f / AttackRate);
+			ActionComp->StartActionByName(this, "Dash");
 		}
 			
 		TurnCharacterInDirectionOfAttack(CameraComp->GetForwardVector().Rotation());
@@ -109,68 +99,6 @@ void ASCharacter::AttackAnimation(AttackType Attack)
 	
 }
 
-
-void ASCharacter::UltimateAttack()
-{
-	if (BlackHoleClass == nullptr)
-	{
-		return;
-	}
-	SpawnProjectile(BlackHoleClass);
-}
-
-void ASCharacter::DashAttack()
-{
-	if (DashClass == nullptr)
-	{
-		return;
-	}
-	SpawnProjectile(DashClass);
-}
-
-void ASCharacter::PrimaryAttack()
-{
-	if (PRojectileClass == nullptr)
-	{
-		return;
-	}
-	SpawnProjectile(PRojectileClass);
-	
-}
-
-void ASCharacter::SpawnProjectile(TSubclassOf<AActor> ClassOfProjectile)
-{
-	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-
-
-
-	// Rotation of projectile on spawn
-	FRotator RotOnTarget;
-	if (Hit.bBlockingHit)
-	{
-		RotOnTarget = (Hit.Location - HandLocation).Rotation();
-	}
-	else
-	{
-		RotOnTarget = (End - HandLocation).Rotation();
-	}
-	// if Camera look at something between camera and player i.e. Something blocking view
-	if ((HandLocation - CameraComp->GetComponentLocation()).Size() > (Hit.Location - CameraComp->GetComponentLocation()).Size())
-	{
-		RotOnTarget = (End - HandLocation).Rotation();
-	}
-
-	// Spawn Projectile
-	FTransform SpawnTM = FTransform(RotOnTarget, HandLocation);
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Instigator = this;
-	GetWorld()->SpawnActor<AActor>(ClassOfProjectile, SpawnTM, SpawnParams);
-	if (MuzzleEffect)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleEffect, SpawnTM);
-	}
-}
 
 // call interaction on interaction component
 void ASCharacter::PrimaryInteract()
@@ -244,8 +172,14 @@ void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent*
 		Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
 		USkeletalMeshComponent* MeshComp = GetMesh();
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		FTimerHandle TimerHandle_Destroy;
+		GetWorldTimerManager().SetTimer(TimerHandle_Destroy, this, &ASCharacter::Killed, 5.f);
 	}
 }
 
+void ASCharacter::Killed()
+{
+	Destroy();
+}
 
 

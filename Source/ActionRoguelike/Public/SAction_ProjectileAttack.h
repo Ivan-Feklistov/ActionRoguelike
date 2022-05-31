@@ -15,15 +15,11 @@ class ACTIONROGUELIKE_API USAction_ProjectileAttack : public USAction
 	GENERATED_BODY()
 	
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool DebugAttackHitLocation;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Attack")
-	TSubclassOf<AActor> PRojectileClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Attack")
-	TSubclassOf<AActor> BlackHoleClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Attack")
-	TSubclassOf<AActor> DashClass;
+	TSubclassOf<AActor> ProjectileClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Attack")
 	UAnimMontage* AttackAnim;
@@ -31,11 +27,22 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	float AttackRate;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	float AttackAnimDelay;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Effect")
 	UParticleSystem* MuzzleEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Effect")
 	FName HandSocketName;
 
+	UFUNCTION()
+	void AttackDelay_Elapsed(ACharacter* InstigatorCharacter);
 
+public:
+
+	UFUNCTION()
+	virtual void StartAction_Implementation(AActor* InstigatorActor) override;
+
+	USAction_ProjectileAttack();
 };

@@ -11,6 +11,7 @@
 #include "SCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "SWorldUserWidget.h"
+#include "SActionComponent.h"
 
 // Sets default values
 ASAICharacter::ASAICharacter()
@@ -20,6 +21,7 @@ ASAICharacter::ASAICharacter()
 
 	PawnSensingComp = CreateDefaultSubobject<UPawnSensingComponent>("PawnSensingComp");
 	AttributeComp = CreateDefaultSubobject<USAttributeComponent>("AttributeComp");
+	ActionComp = CreateDefaultSubobject<USActionComponent>("ActionComp");
 	bDebugPlayerSpotted = false;
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
