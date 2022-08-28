@@ -46,8 +46,13 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
 
+	// for both heal and damage
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	bool ApplyHealthChange(AActor* HealthChangeInstigator, float Delta);
+
+	// static for damaging
+	UFUNCTION(BlueprintCallable, Category = "SGameplayStatics")
+	static bool ApplyDamage(AActor* DamageInstigator, AActor* TargetActor, float Damage);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	float Health;

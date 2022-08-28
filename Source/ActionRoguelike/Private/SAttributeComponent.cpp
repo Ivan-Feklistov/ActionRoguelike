@@ -49,6 +49,9 @@ bool USAttributeComponent::ApplyHealthChange(AActor* HealthChangeInstigator, flo
 		return false;
 	}
 
+	if (!IsAlive())
+		return false;
+
 	if (Delta < 0.0f)
 	{
 		Delta = Delta * CVarDamageMultiplier.GetValueOnGameThread();
@@ -59,7 +62,7 @@ bool USAttributeComponent::ApplyHealthChange(AActor* HealthChangeInstigator, flo
 	Health += Delta;
 	Health = FMath::Clamp(Health, 0.f, MaxHealth);
 	float ActualDelta = Health - OldHealth;
-	OnHealthChanged.Broadcast(HealthChangeInstigator, this, Health, ActualDelta);
+	OnHealthChanged.Broadcast(HealthChangeInstigator, this, Health, Delta);
 
 	// died
 	if (ActualDelta < 0.0f && Health == 0.0f)
@@ -72,6 +75,16 @@ bool USAttributeComponent::ApplyHealthChange(AActor* HealthChangeInstigator, flo
 	}
 
 	return ActualDelta != 0;
+}
+
+bool USAttributeComponent::ApplyDamage(AActor* DamageInstigator, AActor* TargetActor, float Damage)
+{
+	if (USAttributeComponent* AttribComp = GetAttributes(TargetActor))
+	{
+		AttribComp->ApplyHealthChange(DamageInstigator, -Damage);
+		return true;
+	}
+	return false;
 }
 
 USAttributeComponent* USAttributeComponent::GetAttributes(AActor* FromActor)

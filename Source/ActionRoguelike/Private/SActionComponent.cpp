@@ -21,7 +21,7 @@ void USActionComponent::BeginPlay()
 
 	for (TSubclassOf<USAction> ActionClass : DefaultActions)
 	{
-		AddAction(ActionClass);
+		AddAction(GetOwner(), ActionClass);
 	}
 	
 }
@@ -41,7 +41,7 @@ void USActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 }
 
-void USActionComponent::AddAction(TSubclassOf<USAction> ActionClass)
+void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> ActionClass)
 {
 	if (!ActionClass)
 	{
@@ -62,7 +62,37 @@ void USActionComponent::AddAction(TSubclassOf<USAction> ActionClass)
 		}
 
 		Actions.Add(NewAction);
+
+		if (NewAction->bAutoStart && ensure(NewAction->CanStart(Instigator)))
+		{
+			NewAction->StartAction(Instigator);
+		}
 	}
+}
+
+void USActionComponent::RemoveAction(USAction* ActionToRemove)
+{
+	if (!ActionToRemove)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot remove Action: nullptr"));
+		return;
+	}
+
+	if (ActionToRemove->IsRunning())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot remove Action: Action is running"));
+		return;
+	}
+
+	for (USAction* Action : Actions)
+	{
+		if (Action->ActionName == ActionToRemove->ActionName)
+		{	
+			Actions.Remove(Action);
+			break;
+		}	
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Player doesn't have that Action: %s"), *GetNameSafe(ActionToRemove));
 }
 
 bool USActionComponent::StartActionByName(AActor* InstigatorActor, FName ActionName)

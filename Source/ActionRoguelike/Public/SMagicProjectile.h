@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "BaseProjectile.h"
 #include "GameplayTagContainer.h"
+
 #include "SMagicProjectile.generated.h"
 //
 //class USoundBase;
-
+class USActionEffect;
 UCLASS()
 class ACTIONROGUELIKE_API ASMagicProjectile : public ABaseProjectile
 {
@@ -26,6 +27,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	FGameplayTag ParryTag;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	TSubclassOf<USActionEffect> BurningACtionClass;
 
 	void SetIgnores(AActor* InstigatorActor);
 

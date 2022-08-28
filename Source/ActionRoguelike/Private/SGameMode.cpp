@@ -88,7 +88,7 @@ void ASGameMode::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstan
 	
 	// spawn
 	TArray<FVector> Locations = QueryInstance->GetResultsAsLocations();
-	if (Locations.Num() > 0)
+	if (Locations.Num() > 0 && MinionClass)
 	{
 		GetWorld()->SpawnActor<AActor>(MinionClass, Locations[0], FRotator::ZeroRotator);
 	}

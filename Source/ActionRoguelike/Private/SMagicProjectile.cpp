@@ -5,6 +5,7 @@
 #include "SAttributeComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "SCharacter.h"
+#include "SActionEffect.h"
 #include "SActionComponent.h"
 
 
@@ -65,6 +66,12 @@ void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent,
 			return;
 		}
 		AttributeComp->ApplyHealthChange(GetInstigator(), -Damage);
+
+		if (ActionComp)
+		{
+			if (BurningACtionClass)
+				ActionComp->AddAction(GetInstigator(), BurningACtionClass);
+		}
 	}
 
 	if (ImpactSound)
