@@ -6,6 +6,7 @@
 #include "DrawDebugHelpers.h"
 #include "SCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "SWorldUserWidget.h"
 
 
 
@@ -18,6 +19,8 @@ USInteractionComponent::USInteractionComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	InteractRange = 200.f;
+	InteractionRadius = 30.0f;
+	CollisionChannel = ECC_WorldDynamic;
 	bDrawDebugLine = false;
 }
 
@@ -31,20 +34,19 @@ void USInteractionComponent::BeginPlay()
 	
 }
 
-
 // Called every frame
 void USInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	FindBestInteractable();
 }
 
-void USInteractionComponent::PrimaryInteract()
+void USInteractionComponent::FindBestInteractable()
 {
 	FCollisionObjectQueryParams ObjectQueryParams;
-	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-	
+	ObjectQueryParams.AddObjectTypesToQuery(CollisionChannel);
+
 	FVector EyeLocation;
 	FRotator EyeRotation;
 	FVector End;
@@ -52,18 +54,18 @@ void USInteractionComponent::PrimaryInteract()
 	MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
 	ASCharacter* MyCharacter = Cast<ASCharacter>(MyOwner);
 	FHitResult LineHit;
-	
+
 	if (MyCharacter)
 	{
 		//EyeLocation = MyCharacter->CameraComp->GetComponentLocation();
 		//EyeRotation = MyCharacter->CameraComp->GetForwardVector().Rotation();
 		FVector LineEnd;
-		
+
 		LineEnd = MyCharacter->CameraComp->GetComponentLocation() + MyCharacter->CameraComp->GetForwardVector() * 10000;
 
 		GetWorld()->LineTraceSingleByChannel(LineHit, MyCharacter->CameraComp->GetComponentLocation(), LineEnd, ECC_Visibility);
 
-		
+
 	}
 
 	//End = EyeLocation + (EyeRotation.Vector() * InteractRange);
@@ -73,18 +75,21 @@ void USInteractionComponent::PrimaryInteract()
 	//GetWorld()->LineTraceSingleByObjectType(Hit, EyeLocation, End, ObjectQueryParams);
 
 	TArray<FHitResult> Hits;
-	float Radius = 50.f;
+	//float Radius = 50.f;
 	FCollisionShape Shape;
-	Shape.SetSphere(30.f);
-	bool bBlockingHit =  GetWorld()->SweepMultiByObjectType(Hits, EyeLocation, End, FQuat::Identity, ObjectQueryParams, Shape);
+	Shape.SetSphere(InteractionRadius);
+	bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, EyeLocation, End, FQuat::Identity, ObjectQueryParams, Shape);
 
 	FColor DebugColor = bBlockingHit ? FColor::Green : FColor::Red;
 
 	if (bDrawDebugLine == true && bBlockingHit == false)
 	{
-		DrawDebugSphere(GetWorld(), End, Radius, 16, DebugColor, false, 2.f);
+		DrawDebugSphere(GetWorld(), End, InteractionRadius, 16, DebugColor, false, 2.f);
 		DrawDebugLine(GetWorld(), EyeLocation, End, DebugColor, false, 2.f, 0, 2.f);
 	}
+
+	// clear ref before trying to fill
+	FocusedActor = nullptr;
 
 	for (FHitResult Hit : Hits)
 	{
@@ -93,20 +98,57 @@ void USInteractionComponent::PrimaryInteract()
 		{
 			if (bDrawDebugLine)
 			{
-				DrawDebugSphere(GetWorld(), Hit.ImpactPoint, Radius, 16, DebugColor, false, 2.f);
+				DrawDebugSphere(GetWorld(), Hit.ImpactPoint, InteractionRadius, 16, DebugColor, false, 2.f);
 				DrawDebugLine(GetWorld(), EyeLocation, End, DebugColor, false, 2.f, 0, 2.f);
 			}
 			if (HitActor->Implements<USGameplayInterface>())
 			{
-				APawn* MyPawn = Cast<APawn>(MyOwner);
-				ISGameplayInterface::Execute_Interact(HitActor, MyPawn);
-				
+				FocusedActor = HitActor;
+
 				break;
 			}
 		}
 
 	}
-	
+
+	if (FocusedActor)
+	{
+		if (DefaultWidgetInstance == nullptr && ensure(DefaultWidgetClass))
+		{
+			DefaultWidgetInstance = CreateWidget<USWorldUserWidget>(GetWorld(), DefaultWidgetClass);
+		}
+
+		if (DefaultWidgetInstance)
+		{
+			DefaultWidgetInstance->AttachedActor = FocusedActor;
+
+			if (!DefaultWidgetInstance->IsInViewport())
+			{
+				DefaultWidgetInstance->AddToViewport();
+			}
+		}
+
+	}
+	else
+	{
+		if (DefaultWidgetInstance)
+		{
+			DefaultWidgetInstance->RemoveFromParent();
+		}
+	}
+}
+
+
+void USInteractionComponent::PrimaryInteract()
+{
+	if (FocusedActor == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(103, 1.0f, FColor::Red, FString::Printf(TEXT("No focus Actor to interact")));
+		return;
+	}
+
+	APawn* MyPawn = Cast<APawn>(GetOwner());
+	ISGameplayInterface::Execute_Interact(FocusedActor, MyPawn);
 		
 }
 

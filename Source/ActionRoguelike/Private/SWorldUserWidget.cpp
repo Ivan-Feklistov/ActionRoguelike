@@ -21,7 +21,11 @@ void USWorldUserWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTim
 
 		ScreenPosition /= Scale;
 
-		if (ParentSizeBox)
+		if (!ParentSizeBox)
+		{
+			GEngine->AddOnScreenDebugMessage(FMath::Rand(), 5.0f, FColor::Red, FString::Printf(TEXT("You must have Size Box named 'ParentSizeBox' and have everythin else as child of it in order to properly attach widget to object in World!")));
+		}
+		else
 		{
 			ParentSizeBox->SetRenderTranslation(ScreenPosition);
 		}
