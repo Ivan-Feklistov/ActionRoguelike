@@ -16,7 +16,10 @@ USAttributeComponent::USAttributeComponent()
 
 	Health = 100.f;
 	MaxHealth = 100.f;
+	Rage = 0.f;
+	MaxRage = 100.f;
 	MaxScore = 9999;
+	bCanRage = false;
 	GetPlayerScore();
 }
 
@@ -77,11 +80,35 @@ bool USAttributeComponent::ApplyHealthChange(AActor* HealthChangeInstigator, flo
 	return ActualDelta != 0;
 }
 
+bool USAttributeComponent::ApplyRageChange(AActor* RageChangeInstigator, float Delta)
+{
+	if (!GetOwner()->CanBeDamaged() && Delta < 0.0f)
+	{
+		return false;
+	}
+	
+	if (!IsAlive())
+		return false;
+
+	if (!bCanRage)
+		return false;
+	
+	const float OldRage = Rage;
+
+	Rage = Rage + (Delta*RageFactor);
+	Rage = FMath::Clamp(Rage, 0.f, MaxRage);
+	const float ActualDelta = Rage - OldRage;
+	OnRageChanged.Broadcast(RageChangeInstigator, this, Rage, Delta);
+
+	return ActualDelta != 0;
+}
+
 bool USAttributeComponent::ApplyDamage(AActor* DamageInstigator, AActor* TargetActor, float Damage)
 {
 	if (USAttributeComponent* AttribComp = GetAttributes(TargetActor))
 	{
 		AttribComp->ApplyHealthChange(DamageInstigator, -Damage);
+		AttribComp->ApplyRageChange(DamageInstigator, Damage);
 		return true;
 	}
 	return false;

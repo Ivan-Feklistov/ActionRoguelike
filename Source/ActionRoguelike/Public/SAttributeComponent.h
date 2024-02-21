@@ -7,8 +7,8 @@
 #include "Delegates/Delegate.h"
 #include "SAttributeComponent.generated.h"
 
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, InstigatorActor, USAttributeComponent*, OwningComp, float, NewHealth, float, Delta);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnRageChanged, AActor*, InstigatorActor, USAttributeComponent*, OwningComp, float, NewRage, float, Delta);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnScoreChanged, USAttributeComponent*, OwningComp, float, NewScore, float, Delta);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -46,9 +46,15 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnRageChanged OnRageChanged;
+
 	// for both heal and damage
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	bool ApplyHealthChange(AActor* HealthChangeInstigator, float Delta);
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	bool ApplyRageChange(AActor* RageChangeInstigator, float Delta);
 
 	// static for damaging
 	UFUNCTION(BlueprintCallable, Category = "SGameplayStatics")
@@ -59,6 +65,19 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	float MaxHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	bool bCanRage;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	float Rage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	float MaxRage;
+
+	//how rage gained is scaled by damage recieved
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	float RageFactor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Credits")
 	float PlayerScore;

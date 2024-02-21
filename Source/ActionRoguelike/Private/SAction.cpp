@@ -17,6 +17,16 @@ bool USAction::CanStart_Implementation(AActor* Instigator)
 	{
 		return false;
 	}
+
+	if (bUseCostRage)
+	{
+		USAttributeComponent* AttribComp = USAttributeComponent::GetAttributes(Instigator);
+		if (AttribComp != nullptr)
+		{
+			if (AttribComp->Rage < CostRage)
+				return false;
+		}
+	}
 	return true;
 }
 
@@ -27,6 +37,15 @@ void USAction::StartAction_Implementation(AActor* InstigatorActor)
 	USActionComponent* Comp = GetActionComponent();
 	Comp->ActiveGameplayTags.AppendTags(GrantsTags);
 
+	if (bUseCostRage)
+	{
+		USAttributeComponent* AttribComp = USAttributeComponent::GetAttributes(InstigatorActor);
+		if (AttribComp != nullptr)
+		{
+			AttribComp->ApplyRageChange(InstigatorActor, -CostRage);
+				
+		}
+	}
 	bIsRunning = true;
 }
 

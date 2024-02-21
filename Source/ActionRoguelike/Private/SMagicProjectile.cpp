@@ -65,7 +65,8 @@ void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent,
 			SetIgnores(OtherActor);
 			return;
 		}
-		AttributeComp->ApplyHealthChange(GetInstigator(), -Damage);
+		//AttributeComp->ApplyHealthChange(GetInstigator(), -Damage);
+		AttributeComp->ApplyDamage(GetInstigator(), OtherActor, Damage);
 
 		if (ActionComp)
 		{

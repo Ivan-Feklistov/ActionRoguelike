@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "GameplayTagContainer.h"
+#include "SAttributeComponent.h"
 #include "SAction.generated.h"
 
 class UWorld;
@@ -32,6 +33,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Action")
 	bool bAutoStart;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Action")
+	bool bUseCostRage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Action")
+	float CostRage;
 
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	bool IsRunning() const { return bIsRunning; } ;
